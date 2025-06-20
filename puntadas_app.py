@@ -4,32 +4,35 @@ from PIL import Image
 
 st.set_page_config(page_title="GDL Bordados - Calculadora de Puntadas", layout="centered")
 
-# CSS personalizado para estilos elegantes
+# CSS personalizado con fondo de logo y texto claro
 st.markdown(
     """
     <style>
+        .stApp {
+            background: url('https://raw.githubusercontent.com/bordados07/calculadora-puntadas/main/logo_etikreativo.png') no-repeat center center fixed;
+            background-size: 50%;
+            background-color: #111;
+        }
         body {
-            background-color: #111111;
             color: #ffffff;
         }
-        .stApp {
-            background-color: #111111;
-        }
-        h1, h2, h3, .stMarkdown {
-            color: #FFCC00;
+        h1, h2, h3 {
+            color: #00ffe1;
         }
         .stButton>button {
-            background-color: #FFCC00;
+            background-color: #00ffe1;
             color: black;
             font-weight: bold;
+        }
+        .css-1v3fvcr {
+            background-color: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 10px;
+            padding: 1rem;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
-
-# Mostrar el logo centrado
-st.image("https://raw.githubusercontent.com/bordados07/calculadora-puntadas/main/logo_etikreativo.png", width=150)
 
 st.title("🧵 Calculadora de Puntadas")
 st.markdown("Sube tu imagen de bordado, indica el tamaño real y obtendrás una estimación automática de puntadas con base en el área.")
@@ -38,7 +41,7 @@ st.markdown("Sube tu imagen de bordado, indica el tamaño real y obtendrás una 
 uploaded_file = st.file_uploader("📤 Sube tu logo o imagen", type=["jpg", "jpeg", "png"])
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Vista previa del diseño", use_column_width=True)
+    st.image(image, caption="Vista previa del diseño", use_container_width=True)
 
 # Tamaño del bordado
 st.markdown("### 📐 Tamaño estimado del bordado")
@@ -71,6 +74,6 @@ if st.button("🧮 Calcular puntadas"):
 # WhatsApp contacto
 st.markdown("---")
 st.markdown(
-    '<a href="https://wa.me/523328129376" target="_blank" style="color:#FFCC00; text-decoration:none; font-size:18px;">📱 Contáctanos por WhatsApp</a>',
+    '<a href="https://wa.me/523328129376" target="_blank" style="color:#00ffe1; text-decoration:none; font-size:18px;">📱 Contáctanos por WhatsApp</a>',
     unsafe_allow_html=True
 )
