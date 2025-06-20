@@ -4,19 +4,14 @@ from PIL import Image
 
 st.set_page_config(page_title="GDL Bordados - Calculadora de Puntadas", layout="centered")
 
-# CSS personalizado con fondo de logo y texto claro
+# CSS para fondo negro total y texto contrastante
 st.markdown(
     """
     <style>
         .stApp {
-            background: url('https://raw.githubusercontent.com/bordados07/calculadora-puntadas/main/logo_etikreativo.png') no-repeat center center fixed;
-            background-size: 50%;
-            background-color: #111;
+            background-color: #000000;
         }
-        body {
-            color: #ffffff;
-        }
-        h1, h2, h3 {
+        h1, h2, h3, .stMarkdown, .stTextInput, .stNumberInput label, .stSelectbox label {
             color: #00ffe1;
         }
         .stButton>button {
@@ -24,10 +19,8 @@ st.markdown(
             color: black;
             font-weight: bold;
         }
-        .css-1v3fvcr {
-            background-color: rgba(0, 0, 0, 0.6) !important;
-            border-radius: 10px;
-            padding: 1rem;
+        .stMarkdown p {
+            color: #ffffff;
         }
     </style>
     """,
@@ -35,7 +28,7 @@ st.markdown(
 )
 
 st.title("🧵 Calculadora de Puntadas")
-st.markdown("Sube tu imagen de bordado, indica el tamaño real y obtendrás una estimación automática de puntadas con base en el área.")
+st.markdown("Sube tu imagen de bordado, indica el tamaño real y obtendrás una estimación automática de puntadas y su precio.")
 
 # Subir imagen
 uploaded_file = st.file_uploader("📤 Sube tu logo o imagen", type=["jpg", "jpeg", "png"])
@@ -66,10 +59,12 @@ if st.button("🧮 Calcular puntadas"):
         densidad = 300
 
     puntadas = int(area * densidad)
+    precio = round((puntadas / 1000) * 1.5, 2)
 
     st.markdown(f"### ✨ Resultado estimado:")
     st.success(f"🔢 **{puntadas:,} puntadas** para un área de **{area:.2f} cm²**")
     st.info(f"Tipo de cobertura detectada automáticamente: **{tipo}**")
+    st.markdown(f"💰 **Precio estimado del bordado:** ${precio} MXN")
 
 # WhatsApp contacto
 st.markdown("---")
