@@ -4,8 +4,9 @@ from PIL import Image
 import numpy as np
 import cv2
 
-st.set_page_config(page_title="Calculadora de Puntadas con Detección Automática", layout="centered")
+st.set_page_config(page_title="Calculadora de Puntadas con Selector de Densidad", layout="centered")
 
+# Estilos
 st.markdown(
     """
     <style>
@@ -34,7 +35,7 @@ if uploaded_file:
     img_np = np.array(image)
     st.image(image, caption="Imagen original", use_container_width=True)
 
-    # Convertir a HSV para eliminar fondo blanco automáticamente
+    # Eliminar fondo blanco con HSV
     hsv = cv2.cvtColor(img_np, cv2.COLOR_RGB2HSV)
     lower_white = np.array([0, 0, 200], dtype=np.uint8)
     upper_white = np.array([180, 40, 255], dtype=np.uint8)
@@ -50,7 +51,7 @@ if uploaded_file:
     total_area = mask.shape[0] * mask.shape[1]
     porcentaje_util = area_util / total_area
 
-    # Ingreso de medidas
+    # Ingreso de medidas reales
     st.subheader("📐 Tamaño real del bordado")
     col1, col2 = st.columns(2)
     with col1:
@@ -58,17 +59,31 @@ if uploaded_file:
     with col2:
         alto_cm = st.number_input("Alto (cm)", min_value=1.0, value=5.0, step=0.1)
 
-    if st.button("🧮 Calcular puntadas y precio"):
+    # Selector de densidad
+    st.subheader("🧩 Seleccione la cantidad de relleno")
+    densidad = None
+    col_bajo, col_medio, col_alto = st.columns(3)
+    with col_bajo:
+        if st.button("🔹 Bajo (300 pt/cm²)"):
+            densidad = 300
+    with col_medio:
+        if st.button("🔸 Medio (450 pt/cm²)"):
+            densidad = 450
+    with col_alto:
+        if st.button("🔺 Alto (650 pt/cm²)"):
+            densidad = 650
+
+    if densidad:
         area_total = ancho_cm * alto_cm
         area_util_real = area_total * porcentaje_util
-        puntadas = int(area_util_real * 300)
+        puntadas = int(area_util_real * densidad)
         precio = round((puntadas / 1000) * 1.8, 2)
 
         st.markdown(f"### 🔢 Puntadas estimadas: **{puntadas:,}**")
         st.markdown(f"💰 Precio estimado: **${precio} MXN**")
         st.caption(f"Área útil detectada: {porcentaje_util*100:.2f}% del total")
 
-# Enlace de contacto
+# WhatsApp contacto
 st.markdown("---")
 st.markdown(
     '<a href="https://wa.me/523328129376" target="_blank" style="color:#00ffe1; text-decoration:none; font-size:18px;">📱 Contáctanos por WhatsApp</a>',
