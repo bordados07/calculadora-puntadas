@@ -4,19 +4,18 @@ from PIL import Image
 
 st.set_page_config(page_title="GDL Bordados - Calculadora de Puntadas", layout="centered")
 
-# CSS para fondo negro total y texto contrastante
+# CSS actualizado con texto blanco
 st.markdown(
     """
     <style>
         .stApp {
             background-color: #000000;
         }
-        h1, h2, h3, .stMarkdown, .stTextInput, .stNumberInput label, .stSelectbox label {
-            color: #00ffe1;
+        h1, h2, h3, .stMarkdown, .stTextInput, .stNumberInput label, .stSelectbox label, .stButton>button {
+            color: #ffffff !important;
         }
         .stButton>button {
             background-color: #00ffe1;
-            color: black;
             font-weight: bold;
         }
         .stMarkdown p {
@@ -59,7 +58,7 @@ if st.button("🧮 Calcular puntadas"):
         densidad = 300
 
     puntadas = int(area * densidad)
-    precio = round((puntadas / 1000) * 1.5, 2)
+    precio = round((puntadas / 1000) * 1.8, 2)
 
     st.markdown(f"### ✨ Resultado estimado:")
     st.success(f"🔢 **{puntadas:,} puntadas** para un área de **{area:.2f} cm²**")
