@@ -1,91 +1,51 @@
 
 import streamlit as st
-from PIL import Image
 import numpy as np
 import cv2
+from PIL import Image
 
-st.set_page_config(page_title="Calculadora de Puntadas con Selector de Densidad", layout="centered")
+st.set_page_config(page_title="Calculadora de Puntadas", layout="centered")
 
-# Estilos
-st.markdown(
-    """
-    <style>
-        .stApp {
-            background-color: #000000;
-        }
-        h1, h2, h3, p, label, div {
-            color: #ffffff !important;
-        }
-        .stButton>button {
-            background-color: #00ffe1;
-            color: black;
-            font-weight: bold;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("<h1 style='text-align: center; color: white;'>Calculadora de Puntadas para Bordado</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Sube tu diseño, elige si deseas eliminar el fondo automáticamente o no, y obtén un estimado de puntadas y precio.</p>", unsafe_allow_html=True)
+st.markdown("<hr>", unsafe_allow_html=True)
 
-st.title("🧵 Calculadora de Puntadas con Eliminación Automática de Fondo")
-
-uploaded_file = st.file_uploader("📤 Sube tu imagen de bordado (con fondo blanco)", type=["jpg", "jpeg", "png"])
-
-if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
-    img_np = np.array(image)
-    st.image(image, caption="Imagen original", use_container_width=True)
-
-    # Eliminar fondo blanco con HSV
-    hsv = cv2.cvtColor(img_np, cv2.COLOR_RGB2HSV)
-    lower_white = np.array([0, 0, 200], dtype=np.uint8)
-    upper_white = np.array([180, 40, 255], dtype=np.uint8)
-    mask = cv2.inRange(hsv, lower_white, upper_white)
-    mask_inv = cv2.bitwise_not(mask)
-
-    # Mostrar imagen sin fondo blanco
-    result = cv2.bitwise_and(img_np, img_np, mask=mask_inv)
-    st.image(result, caption="Fondo eliminado automáticamente", use_container_width=True)
-
-    # Calcular área útil
-    area_util = np.count_nonzero(mask_inv)
-    total_area = mask.shape[0] * mask.shape[1]
-    porcentaje_util = area_util / total_area
-
-    # Ingreso de medidas reales
-    st.subheader("📐 Tamaño real del bordado")
-    col1, col2 = st.columns(2)
-    with col1:
-        ancho_cm = st.number_input("Ancho (cm)", min_value=1.0, value=10.0, step=0.1)
-    with col2:
-        alto_cm = st.number_input("Alto (cm)", min_value=1.0, value=5.0, step=0.1)
-
-    # Selector de densidad
-    st.subheader("🧩 Seleccione la cantidad de relleno")
-    densidad = None
-    col_bajo, col_medio, col_alto = st.columns(3)
-    with col_bajo:
-        if st.button("🔹 Bajo (300 pt/cm²)"):
-            densidad = 300
-    with col_medio:
-        if st.button("🔸 Medio (450 pt/cm²)"):
-            densidad = 450
-    with col_alto:
-        if st.button("🔺 Alto (650 pt/cm²)"):
-            densidad = 650
-
-    if densidad:
-        area_total = ancho_cm * alto_cm
-        area_util_real = area_total * porcentaje_util
-        puntadas = int(area_util_real * densidad)
-        precio = round((puntadas / 1000) * 1.8, 2)
-
-        st.markdown(f"### 🔢 Puntadas estimadas: **{puntadas:,}**")
-        st.markdown(f"💰 Precio estimado: **${precio} MXN**")
-        st.caption(f"Área útil detectada: {porcentaje_util*100:.2f}% del total")
-
-# WhatsApp contacto
+st.markdown("### ¿Duda con la eliminación de fondo?")
+st.markdown("[Haz clic aquí para quitar el fondo manualmente](https://www.iloveimg.com/es/eliminar-fondo)", unsafe_allow_html=True)
 st.markdown("---")
-st.markdown(
-    '<a href="https://wa.me/523328129376" target="_blank" style="color:#00ffe1; text-decoration:none; font-size:18px;">📱 Contáctanos por WhatsApp</a>',
-    unsafe_allow_html=True
-)
+
+uploaded_file = st.file_uploader("📤 Sube tu imagen", type=["png", "jpg", "jpeg"])
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGBA")
+    image_np = np.array(image)
+
+    st.image(image, caption="🖼️ Imagen original", use_column_width=True)
+
+    metodo = st.radio("¿Deseas quitar el fondo?", ["Automático", "Desactivado"])
+    if metodo == "Automático":
+        image_gray = cv2.cvtColor(image_np, cv2.COLOR_RGBA2GRAY)
+        _, alpha = cv2.threshold(image_gray, 250, 255, cv2.THRESH_BINARY_INV)
+        image_np[:, :, 3] = alpha
+        st.image(image_np, caption="🧽 Fondo eliminado automáticamente", use_column_width=True)
+
+    elif metodo == "Desactivado":
+        st.warning("La imagen se procesará con el fondo incluido.")
+
+    st.markdown("### ✏️ Selecciona la cantidad de relleno")
+    nivel = st.radio("Seleccione la cantidad de relleno:", ["Bajo", "Medio", "Alto"])
+
+    if nivel == "Bajo":
+        densidad = 300
+    elif nivel == "Medio":
+        densidad = 450
+    else:
+        densidad = 650
+
+    alpha_channel = image_np[:, :, 3]
+    visible_pixels = np.sum(alpha_channel > 0)
+
+    puntadas_estimadas = int((visible_pixels / 100) * (densidad / 100))
+    precio_estimado = (puntadas_estimadas / 1000) * 1.8
+
+    st.success(f"🧵 Puntadas estimadas: {puntadas_estimadas}")
+    st.info(f"💸 Precio estimado: ${precio_estimado:.2f} MXN")
