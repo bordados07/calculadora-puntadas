@@ -7,7 +7,7 @@ from PIL import Image
 st.set_page_config(page_title="Calculadora de Puntadas", layout="centered")
 
 st.markdown("<h1 style='text-align: center; color: white;'>Calculadora de Puntadas para Bordado</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>Sube tu diseño, elige si deseas eliminar el fondo automáticamente o no, y obtén un estimado de puntadas y precio.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Sube tu diseño, elimina el fondo, elige el relleno y conoce el estimado de puntadas y costo.</p>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
 st.markdown("### ¿Duda con la eliminación de fondo?")
@@ -18,6 +18,8 @@ uploaded_file = st.file_uploader("📤 Sube tu imagen", type=["png", "jpg", "jpe
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGBA")
     image_np = np.array(image)
+    original_width, original_height = image.size
+    aspect_ratio = original_width / original_height
 
     st.image(image, caption="🖼️ Imagen original", use_column_width=True)
 
@@ -27,9 +29,20 @@ if uploaded_file:
         _, alpha = cv2.threshold(image_gray, 250, 255, cv2.THRESH_BINARY_INV)
         image_np[:, :, 3] = alpha
         st.image(image_np, caption="🧽 Fondo eliminado automáticamente", use_column_width=True)
-
-    elif metodo == "Desactivado":
+    else:
         st.warning("La imagen se procesará con el fondo incluido.")
+
+    st.markdown("### ✏️ Define una medida del diseño")
+    modo = st.radio("¿Qué medida deseas ingresar?", ["Ancho (cm)", "Alto (cm)"])
+
+    if modo == "Ancho (cm)":
+        ancho_cm = st.number_input("Ancho (cm)", min_value=1.0, value=10.0)
+        alto_cm = ancho_cm / aspect_ratio
+    else:
+        alto_cm = st.number_input("Alto (cm)", min_value=1.0, value=10.0)
+        ancho_cm = alto_cm * aspect_ratio
+
+    st.markdown(f"📏 Medidas proporcionales del diseño: **{ancho_cm:.2f} cm x {alto_cm:.2f} cm**")
 
     st.markdown("### ✏️ Selecciona la cantidad de relleno")
     nivel = st.radio("Seleccione la cantidad de relleno:", ["Bajo", "Medio", "Alto"])
